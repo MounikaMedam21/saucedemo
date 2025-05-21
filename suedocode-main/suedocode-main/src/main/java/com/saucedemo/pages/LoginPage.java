@@ -1,37 +1,49 @@
-package com.saucedemo.pages;
+package sauceDemo.factory;
 
 import com.microsoft.playwright.Page;
 
-/**
- * Page Object for the Login page
- */
-public class LoginPage extends BasePage {
-    // Selectors
-    private final String usernameInputSelector = "#user-name";
-    private final String passwordInputSelector = "#password";
-    private final String loginButtonSelector = "#login-button";
-
-    public LoginPage(Page page) {
-        super(page);
+public class LoginPage {
+	
+	Page page;
+	
+	//Locators for login page
+	private String usernameInputField = "#user-name";
+	private String passwordInputField = "#password";
+	private String loginButton = "#login-button";
+	// Locator for inventory items
+    private final String inventoryItem = ".inventory_item";
+	
+	//Page Constructor
+	public LoginPage(Page page) {
+		this.page = page;
+	}
+	
+	//Navigate to the login page
+	public void navigateToLoginPage() {
+        page.navigate("https://www.saucedemo.com/");
+    }
+		
+	public void loginPage(String Username, String Password) {
+		page.fill(usernameInputField, Username);
+		page.fill(passwordInputField, Password);
+		page.click(loginButton);
+		
+	}
+	
+	// Verify if current URL is the inventory page
+    public boolean isAtInventoryPage() {
+        return page.url().equals("https://www.saucedemo.com/inventory.html");
     }
 
-    /**
-     * Navigates to the login page
-     */
-    public void navigateToLoginPage() {
-        navigate("https://www.saucedemo.com/");
+    // Count the number of products displayed
+    public int getProductCount() {
+        return page.locator(inventoryItem).count();
     }
 
-    /**
-     * Logs in with the specified credentials
-     * @param username Username
-     * @param password Password
-     * @return ProductsPage - the next page after login
-     */
-    public ProductsPage login(String username, String password) {
-        page.fill(usernameInputSelector, username);
-        page.fill(passwordInputSelector, password);
-        page.click(loginButtonSelector);
-        return new ProductsPage(page);
-    }
 }
+
+
+
+    
+
+
