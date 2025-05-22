@@ -1,56 +1,47 @@
 package sauceDemo.tests;
 
-import com.microsoft.playwright.*;
 import org.testng.Assert;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterTest;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import com.microsoft.playwright.*;
+
 import sauceDemo.factory.LoginPage;
+import sauceDemo.factory.InventoryPage;
 
 public class LoginTest {
     private Playwright playwright;
     private Browser browser;
-    private BrowserContext context;
     private Page page;
     private LoginPage loginPage;
+    private InventoryPage inventoryPage;
 
-    @BeforeClass
+    @BeforeTest
     public void setUp() {
-        // Initialize Playwright and launch browser
         playwright = Playwright.create();
         browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(false));
-    }
-
-    @BeforeMethod
-    public void createContextAndPage() {
-        // Create a new browser context and page for each test
-        context = browser.newContext();
-        page = context.newPage();
+        page = browser.newPage();
         loginPage = new LoginPage(page);
+        inventoryPage = new InventoryPage(page); // Initialize inventoryPage
         loginPage.navigateToLoginPage();
     }
 
     @Test
-    public void testValidLoginAndInventoryVerification() {
+    public void testValidLoginAndInventoryPage() {
         // Perform login
         loginPage.loginPage("standard_user", "secret_sauce");
-
         // Verify navigation to inventory page
-        Assert.assertTrue(loginPage.isAtInventoryPage(), "User should be redirected to inventory page after login");
-
+        Assert.assertTrue(loginPage.isAtInventoryPage(), "User is not redirected to the inventory page.");
         // Verify product count
         int productCount = loginPage.getProductCount();
         Assert.assertEquals(productCount, 6, "There should be exactly 6 products on the inventory page");
+        Assert.assertEquals(inventoryPage.getProductCount(), 6, "The number of products displayed is not 6.");
     }
 
-    @AfterMethod
-    public void closeContext() {
-        // Close the browser context after each test
-        context.close();
-    }
-
-    @AfterClass
+    @AfterTest
     public void tearDown() {
-        // Close browser and Playwright
         browser.close();
         playwright.close();
     }
 }
+
